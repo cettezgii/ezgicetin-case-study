@@ -1,0 +1,7 @@
+.p-menubar {
+  display: flex !important;
+  align-items: center !important;
+  color: var(--p-menubar-color);
+  padding: var(--p-menubar-padding);
+  gap: var(--p-menubar-gap);
+}

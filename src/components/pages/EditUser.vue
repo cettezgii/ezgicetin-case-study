@@ -1,11 +1,11 @@
 <template>
-  <div class="add-user-container">
+  <div class="edit-user-container">
     <div class="card">
-      <h2 class="form-title">Add User</h2>
+      <h2 class="form-title">Edit User</h2>
       <div v-if="loading" class="loading">Loading...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else class="form-content">
-        <form @submit.prevent="createUser">
+        <form @submit.prevent="updateUser">
           <TabView>
             <TabPanel header="User Info">
               <div class="form-group">
@@ -165,61 +165,102 @@
     </div>
   </div>
 </template>
-
-<script>
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-
-export default {
-  name: 'AddUser',
-  components: {
-    TabView,
-    TabPanel
-  },
-  data() {
-    return {
-      user: {
-        name: '',
-        username: '',
-        email: '',
-        address: {
-          street: '',
-          suite: '',
-          city: '',
-          zipcode: '',
-          geo: {
-            lat: '',
-            lng: ''
+  
+  <script>
+  import { mapGetters } from 'vuex';
+  import TabView from 'primevue/tabview';
+  import TabPanel from 'primevue/tabpanel';
+  
+  export default {
+    name: 'EditUser',
+    components: {
+      TabView,
+      TabPanel
+    },
+    data() {
+      return {
+        user: {
+          id: null,
+          name: '',
+          username: '',
+          email: '',
+          address: {
+            street: '',
+            suite: '',
+            city: '',
+            zipcode: '',
+            geo: {
+              lat: '',
+              lng: ''
+            }
+          },
+          phone: '',
+          website: '',
+          company: {
+            name: '',
+            catchPhrase: '',
+            bs: ''
           }
         },
-        phone: '',
-        website: '',
-        company: {
-          name: '',
-          catchPhrase: '',
-          bs: ''
+        loading: false,
+        error: null
+      };
+    },
+    computed: {
+      ...mapGetters(['getUserById'])
+    },
+    created() {
+      this.fetchUser();
+    },
+    methods: {
+      async fetchUser() {
+        this.loading = true;
+        try {
+          const id = this.$route.params.id;
+          await this.$store.dispatch('fetchUserById', id);
+          const user = this.getUserById(id);
+          if (user) {
+            this.user = {
+              ...this.user,
+              ...user,
+              id: parseInt(id),
+              address: {
+                ...this.user.address,
+                ...user.address,
+                geo: {
+                  ...this.user.address.geo,
+                  ...user.address.geo
+                }
+              },
+              company: {
+                ...this.user.company,
+                ...user.company
+              }
+            };
+          } else {
+            this.error = 'User not found';
+          }
+        } catch (err) {
+          this.error = 'Failed to load user data';
+        } finally {
+          this.loading = false;
         }
       },
-      loading: false,
-      error: null
-    };
-  },
-  methods: {
-    async createUser() {
-      this.loading = true;
-      try {
-        await this.$store.dispatch('createUser', this.user);
+      async updateUser() {
+        this.loading = true;
+        try {
+          await this.$store.dispatch('updateUser', this.user);
+          this.$router.push({ name: 'UsersList' });
+        } catch (err) {
+          this.error = 'Failed to update user';
+        } finally {
+          this.loading = false;
+        }
+      },
+      cancel() {
         this.$router.push({ name: 'UsersList' });
-      } catch (err) {
-        this.error = 'Failed to create user';
-      } finally {
-        this.loading = false;
       }
-    },
-    cancel() {
-      this.$router.push({ name: 'UsersList' });
     }
-  }
-};
-</script>
-
+  };
+  </script>
+  

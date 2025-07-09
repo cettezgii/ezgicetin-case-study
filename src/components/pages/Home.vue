@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <div class="home-banner">
-      <img src="@/assets/homeBackground.png" alt="Gym Background" />
+      <img src="@/assets/images/homeBackground.png" alt="Gym Background" />
     </div>
     <div class="dashboard-section">
       <h1 class="dashboard-title">Dashboard</h1>
@@ -25,12 +25,12 @@
         <h1 class="section-title">Membership Trends</h1>
         <span class="section-subtitle">Membership Growth</span>
         <h2 class="growth-rate">+250%</h2>
-        <img src="@/assets/chart.png" alt="Membership Chart" class="chart-image" />
+        <img src="@/assets/images/chart.png" alt="Membership Chart" class="chart-image" />
       </div>
       <div class="col-6 membership-section">
         <h1 class="section-title">Monthly Calendar</h1>
         <span class="section-subtitle">Check the club activities</span>
-        <img src="@/assets/calender.png" alt="Calendar" class="chart-image" />
+        <img src="@/assets/images/calender.png" alt="Calendar" class="chart-image" />
       </div>
     </div>
   </div>
@@ -114,7 +114,7 @@ export default defineComponent({
 
 .stat-icon {
   font-size: 1.5rem;
-  color: #7cbad4;
+  color: #337e9d;
 }
 
 .stat-text {

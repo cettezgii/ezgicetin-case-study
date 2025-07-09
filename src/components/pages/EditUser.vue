@@ -6,7 +6,7 @@
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else class="form-content">
         <form @submit.prevent="updateUser">
-          <TabView>
+          <TabView v-model:activeIndex="activeTab">
             <TabPanel header="User Info">
               <div class="form-group">
                 <label for="name">Name</label>
@@ -158,56 +158,59 @@
           </TabView>
           <div class="form-actions">
             <button type="submit" class="submit-button">Save</button>
-            <button type="button" class="cancel-button" @click="cancel">Cancel</button>
+            <button type="button" class="cancel-button" @click="cancel">
+              Cancel
+            </button>
           </div>
         </form>
       </div>
     </div>
   </div>
 </template>
-  
-  <script>
-  import { mapGetters } from 'vuex';
-  import TabView from 'primevue/tabview';
-  import TabPanel from 'primevue/tabpanel';
-  
+
+<script>
+  import { mapGetters } from "vuex";
+  import TabView from "primevue/tabview";
+  import TabPanel from "primevue/tabpanel";
+
   export default {
-    name: 'EditUser',
+    name: "EditUser",
     components: {
       TabView,
-      TabPanel
+      TabPanel,
     },
     data() {
       return {
+        activeTab: 0, // Varsayılan olarak User Info sekmesi seçili
         user: {
           id: null,
-          name: '',
-          username: '',
-          email: '',
+          name: "",
+          username: "",
+          email: "",
           address: {
-            street: '',
-            suite: '',
-            city: '',
-            zipcode: '',
+            street: "",
+            suite: "",
+            city: "",
+            zipcode: "",
             geo: {
-              lat: '',
-              lng: ''
-            }
+              lat: "",
+              lng: "",
+            },
           },
-          phone: '',
-          website: '',
+          phone: "",
+          website: "",
           company: {
-            name: '',
-            catchPhrase: '',
-            bs: ''
-          }
+            name: "",
+            catchPhrase: "",
+            bs: "",
+          },
         },
         loading: false,
-        error: null
+        error: null,
       };
     },
     computed: {
-      ...mapGetters(['getUserById'])
+      ...mapGetters(["getUserById"]),
     },
     created() {
       this.fetchUser();
@@ -217,7 +220,7 @@
         this.loading = true;
         try {
           const id = this.$route.params.id;
-          await this.$store.dispatch('fetchUserById', id);
+          await this.$store.dispatch("fetchUserById", id);
           const user = this.getUserById(id);
           if (user) {
             this.user = {
@@ -229,19 +232,19 @@
                 ...user.address,
                 geo: {
                   ...this.user.address.geo,
-                  ...user.address.geo
-                }
+                  ...user.address.geo,
+                },
               },
               company: {
                 ...this.user.company,
-                ...user.company
-              }
+                ...user.company,
+              },
             };
           } else {
-            this.error = 'User not found';
+            this.error = "User not found";
           }
         } catch (err) {
-          this.error = 'Failed to load user data';
+          this.error = "Failed to load user data";
         } finally {
           this.loading = false;
         }
@@ -249,18 +252,24 @@
       async updateUser() {
         this.loading = true;
         try {
-          await this.$store.dispatch('updateUser', this.user);
-          this.$router.push({ name: 'UsersList' });
+          await this.$store.dispatch("updateUser", this.user);
+          this.$router.push({ name: "UsersList" });
         } catch (err) {
-          this.error = 'Failed to update user';
+          this.error = "Failed to update user";
         } finally {
           this.loading = false;
         }
       },
       cancel() {
-        this.$router.push({ name: 'UsersList' });
-      }
-    }
+        this.$router.push({ name: "UsersList" });
+      },
+    },
   };
-  </script>
-  
+</script>
+
+<style scoped>
+  :deep(.p-tabview-ink-bar) {
+    height: 3px;
+    background-color: #4a76cd;
+  }
+</style>

@@ -1,11 +1,11 @@
-import { createStore } from 'vuex';
-import axios from 'axios';
+import { createStore } from "vuex";
+import axios from "axios";
 
 export default createStore({
   state: {
     count: 0,
     users: [],
-    currentUser: null
+    currentUser: null,
   },
   mutations: {
     increment(state) {
@@ -18,33 +18,51 @@ export default createStore({
       state.currentUser = user;
     },
     updateUser(state, updatedUser) {
-      const index = state.users.findIndex(user => user.id === updatedUser.id);
+      const index = state.users.findIndex((user) => user.id === updatedUser.id);
       if (index !== -1) {
         state.users[index] = updatedUser;
       }
       state.currentUser = updatedUser;
-    }
+    },
+    addUser(state, newUser) {
+      state.users.push(newUser);
+    },
   },
   actions: {
     increment({ commit }) {
-      commit('increment');
+      commit("increment");
     },
     async fetchUsers({ commit }) {
-      const response = await axios.get('https://jsonplaceholder.typicode.com/users');
-      commit('setUsers', response.data);
+      const response = await axios.get(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      commit("setUsers", response.data);
     },
     async fetchUserById({ commit }, id) {
-      const response = await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`);
-      commit('setCurrentUser', response.data);
+      const response = await axios.get(
+        `https://jsonplaceholder.typicode.com/users/${id}`
+      );
+      commit("setCurrentUser", response.data);
     },
     async updateUser({ commit }, user) {
-      const response = await axios.put(`https://jsonplaceholder.typicode.com/users/${user.id}`, user);
-      commit('updateUser', response.data);
-    }
+      const response = await axios.put(
+        `https://jsonplaceholder.typicode.com/users/${user.id}`,
+        user
+      );
+      commit("updateUser", response.data);
+    },
+    async addUser({ commit }, user) {
+      const response = await axios.post(
+        "https://jsonplaceholder.typicode.com/users",
+        user
+      );
+      commit("addUser", response.data);
+    },
   },
   getters: {
-    getCount: state => state.count,
-    getUsers: state => state.users,
-    getUserById: state => id => state.users.find(user => user.id === parseInt(id)) || state.currentUser
-  }
+    getCount: (state) => state.count,
+    getUsers: (state) => state.users,
+    getUserById: (state) => (id) =>
+      state.users.find((user) => user.id === parseInt(id)) || state.currentUser,
+  },
 });

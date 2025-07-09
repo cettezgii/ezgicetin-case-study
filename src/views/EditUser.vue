@@ -168,103 +168,100 @@
   </div>
 </template>
 
-<script>
-  import { mapGetters } from "vuex";
+<script setup>
+  import { ref, reactive, onMounted } from "vue";
+  import { useRoute, useRouter } from "vue-router";
+  import { useStore } from "vuex";
   import TabView from "primevue/tabview";
   import TabPanel from "primevue/tabpanel";
 
-  export default {
-    name: "EditUser",
-    components: {
-      TabView,
-      TabPanel,
-    },
-    data() {
-      return {
-        activeTab: 0, // Varsayılan olarak User Info sekmesi seçili
-        user: {
-          id: null,
-          name: "",
-          username: "",
-          email: "",
-          address: {
-            street: "",
-            suite: "",
-            city: "",
-            zipcode: "",
-            geo: {
-              lat: "",
-              lng: "",
-            },
-          },
-          phone: "",
-          website: "",
-          company: {
-            name: "",
-            catchPhrase: "",
-            bs: "",
-          },
-        },
-        loading: false,
-        error: null,
-      };
-    },
-    computed: {
-      ...mapGetters(["getUserById"]),
-    },
-    created() {
-      this.fetchUser();
-    },
-    methods: {
-      async fetchUser() {
-        this.loading = true;
-        try {
-          const id = this.$route.params.id;
-          await this.$store.dispatch("fetchUserById", id);
-          const user = this.getUserById(id);
-          if (user) {
-            this.user = {
-              ...this.user,
-              ...user,
-              id: parseInt(id),
-              address: {
-                ...this.user.address,
-                ...user.address,
-                geo: {
-                  ...this.user.address.geo,
-                  ...user.address.geo,
-                },
-              },
-              company: {
-                ...this.user.company,
-                ...user.company,
-              },
-            };
-          } else {
-            this.error = "User not found";
-          }
-        } catch (err) {
-          this.error = "Failed to load user data";
-        } finally {
-          this.loading = false;
-        }
-      },
-      async updateUser() {
-        this.loading = true;
-        try {
-          await this.$store.dispatch("updateUser", this.user);
-          this.$router.push({ name: "UsersList" });
-        } catch (err) {
-          this.error = "Failed to update user";
-        } finally {
-          this.loading = false;
-        }
-      },
-      cancel() {
-        this.$router.push({ name: "UsersList" });
+  const activeTab = ref(0);
+  const loading = ref(false);
+  const error = ref(null);
+
+  const user = reactive({
+    id: null,
+    name: "",
+    username: "",
+    email: "",
+    address: {
+      street: "",
+      suite: "",
+      city: "",
+      zipcode: "",
+      geo: {
+        lat: "",
+        lng: "",
       },
     },
-  };
+    phone: "",
+    website: "",
+    company: {
+      name: "",
+      catchPhrase: "",
+      bs: "",
+    },
+  });
+
+  const route = useRoute();
+  const router = useRouter();
+  const store = useStore();
+
+  async function fetchUser() {
+    loading.value = true;
+    error.value = null;
+    try {
+      const id = route.params.id;
+      await store.dispatch("fetchUserById", id);
+      const fetchedUser = store.getters.getUserById(id);
+      if (fetchedUser) {
+        user.id = parseInt(id);
+        user.name = fetchedUser.name || "";
+        user.username = fetchedUser.username || "";
+        user.email = fetchedUser.email || "";
+        user.phone = fetchedUser.phone || "";
+        user.website = fetchedUser.website || "";
+
+        user.address.street = fetchedUser.address?.street || "";
+        user.address.suite = fetchedUser.address?.suite || "";
+        user.address.city = fetchedUser.address?.city || "";
+        user.address.zipcode = fetchedUser.address?.zipcode || "";
+        user.address.geo.lat = fetchedUser.address?.geo?.lat || "";
+        user.address.geo.lng = fetchedUser.address?.geo?.lng || "";
+
+        user.company.name = fetchedUser.company?.name || "";
+        user.company.catchPhrase = fetchedUser.company?.catchPhrase || "";
+        user.company.bs = fetchedUser.company?.bs || "";
+      } else {
+        error.value = "User not found";
+      }
+    } catch (err) {
+      error.value = "Failed to load user data";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function updateUser() {
+    loading.value = true;
+    error.value = null;
+    try {
+      await store.dispatch("updateUser", user);
+      router.push({ name: "UsersList" });
+    } catch (err) {
+      error.value = "Failed to update user";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function cancel() {
+    router.push({ name: "UsersList" });
+  }
+
+  onMounted(() => {
+    fetchUser();
+  });
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/components/pages/Home.vue";
-import UserList from "@/components/pages/UserList.vue";
-import EditUser from "@/components/pages/EditUser.vue";
+import Home from "@/views/Home.vue";
+import UserList from "@/views/UserList.vue";
+import EditUser from "@/views/EditUser.vue";
 
 const routes = [
   { path: "/", name: "Home", component: Home, meta: { title: "Home" } },

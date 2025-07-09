@@ -5,55 +5,37 @@
       class="navbar-logo"
       @click="goHome"
     />
-    <div>
-      <Menubar :model="items" />
-    </div>
+    <Menubar :model="menuItems" />
   </div>
 </template>
 
-<script>
-  import { defineComponent, computed } from "vue";
+<script setup>
   import { useRouter, useRoute } from "vue-router";
+  import { computed } from "vue";
   import Menubar from "primevue/menubar";
 
-  export default defineComponent({
-    name: "NavbarMenu",
-    components: { Menubar },
-    setup() {
-      const router = useRouter();
-      const route = useRoute();
+  const router = useRouter();
+  const route = useRoute();
 
-      const goHome = () => {
-        router.push("/");
-      };
+  const goHome = () => {
+    router.push("/");
+  };
 
-      const items = computed(() => [
-        {
-          label: "Home",
-          icon: "pi pi-home",
-          command: () => {
-            router.push("/");
-          },
-          class: route.path === "/" ? "active" : "",
-        },
-        {
-          label: "Users List",
-          icon: "pi pi-users",
-          command: () => {
-            router.push("/users");
-          },
-          class: route.path === "/users" ? "active" : "",
-        },
-      ]);
-
-      return {
-        items,
-        goHome,
-      };
+  const menuItems = computed(() => [
+    {
+      label: "Home",
+      icon: "pi pi-home",
+      command: () => router.push("/"),
+      class: route.path === "/" ? "active" : "",
     },
-  });
+    {
+      label: "User List",
+      icon: "pi pi-users",
+      command: () => router.push("/users"),
+      class: route.path === "/users" ? "active" : "",
+    },
+  ]);
 </script>
-
 <style>
   .nav-bar-layout {
     background-color: #0b2050;

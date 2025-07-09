@@ -7,9 +7,10 @@
           label="Add User"
           icon="pi pi-plus"
           class="p-button-success"
-          @click="openModal"
+          @click="showAddUserModal = true"
         />
       </div>
+
       <DataTable
         :value="users"
         stripedRows
@@ -17,10 +18,10 @@
         class="p-datatable-custom"
         :loading="loading"
       >
-        <Column field="id" header="ID" sortable></Column>
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="username" header="Username"></Column>
-        <Column field="email" header="Email"></Column>
+        <Column field="id" header="ID" sortable />
+        <Column field="name" header="Name" sortable />
+        <Column field="username" header="Username" />
+        <Column field="email" header="Email" />
         <Column header="">
           <template #body="{ data }">
             <button
@@ -33,55 +34,53 @@
           </template>
         </Column>
       </DataTable>
+
       <AddUserModal v-model:visible="showAddUserModal" @save-user="addUser" />
     </div>
   </div>
 </template>
 
-<script>
-  import { mapGetters } from "vuex";
+<script setup>
+  import { ref, computed, onMounted } from "vue";
+  import { useStore } from "vuex";
+  import { useRouter } from "vue-router";
+  import AddUserModal from "@/components/modals/AddUserModal.vue";
   import DataTable from "primevue/datatable";
   import Column from "primevue/column";
   import Button from "primevue/button";
-  import AddUserModal from "@/components/modals/AddUserModal.vue";
 
-  export default {
-    name: "UserList",
-    components: { DataTable, Column, Button, AddUserModal },
-    data() {
-      return {
-        loading: false,
-        showAddUserModal: false,
-      };
-    },
-    computed: {
-      ...mapGetters(["getUsers"]),
-      users() {
-        return this.getUsers;
-      },
-    },
-    created() {
-      this.fetchUsers();
-    },
-    methods: {
-      async fetchUsers() {
-        this.loading = true;
-        await this.$store.dispatch("fetchUsers");
-        this.loading = false;
-      },
-      editUser(id) {
-        this.$router.push({ name: "EditUser", params: { id } });
-      },
-      openModal() {
-        this.showAddUserModal = true;
-      },
-      async addUser(newUser) {
-        await this.$store.dispatch("addUser", newUser);
-        this.showAddUserModal = false;
-        await this.fetchUsers();
-      },
-    },
+  const store = useStore();
+  const router = useRouter();
+
+  const loading = ref(false);
+  const showAddUserModal = ref(false);
+
+  const users = computed(() => store.getters.getUsers);
+
+  const fetchUsers = async () => {
+    loading.value = true;
+    try {
+      await store.dispatch("fetchUsers");
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    } finally {
+      loading.value = false;
+    }
   };
+
+  const editUser = (id) => {
+    router.push({ name: "EditUser", params: { id } });
+  };
+
+  const addUser = async (newUser) => {
+    await store.dispatch("addUser", newUser);
+    showAddUserModal.value = false;
+    await fetchUsers();
+  };
+
+  onMounted(() => {
+    fetchUsers();
+  });
 </script>
 
 <style scoped>

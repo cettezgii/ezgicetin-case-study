@@ -1,68 +1,82 @@
+// src/store/index.js
+
 import { createStore } from "vuex";
 import axios from "axios";
 
 export default createStore({
   state: {
-    count: 0,
     users: [],
     currentUser: null,
   },
+
   mutations: {
-    increment(state) {
-      state.count += 1;
-    },
     setUsers(state, users) {
       state.users = users;
     },
     setCurrentUser(state, user) {
       state.currentUser = user;
     },
-    updateUser(state, updatedUser) {
-      const index = state.users.findIndex((user) => user.id === updatedUser.id);
-      if (index !== -1) {
-        state.users[index] = updatedUser;
-      }
+    updateUserInList(state, updatedUser) {
+      const index = state.users.findIndex((u) => u.id === updatedUser.id);
+      if (index !== -1) state.users[index] = updatedUser;
       state.currentUser = updatedUser;
     },
-    addUser(state, newUser) {
+    addUserToList(state, newUser) {
       state.users.push(newUser);
     },
   },
+
   actions: {
-    increment({ commit }) {
-      commit("increment");
-    },
     async fetchUsers({ commit }) {
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
-      );
-      commit("setUsers", response.data);
+      try {
+        const { data } = await axios.get(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        commit("setUsers", data);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+      }
     },
+
     async fetchUserById({ commit }, id) {
-      const response = await axios.get(
-        `https://jsonplaceholder.typicode.com/users/${id}`
-      );
-      commit("setCurrentUser", response.data);
+      try {
+        const { data } = await axios.get(
+          `https://jsonplaceholder.typicode.com/users/${id}`
+        );
+        commit("setCurrentUser", data);
+      } catch (err) {
+        console.error(`Failed to fetch user with ID ${id}:`, err);
+      }
     },
+
     async updateUser({ commit }, user) {
-      const response = await axios.put(
-        `https://jsonplaceholder.typicode.com/users/${user.id}`,
-        user
-      );
-      commit("updateUser", response.data);
+      try {
+        const { data } = await axios.put(
+          `https://jsonplaceholder.typicode.com/users/${user.id}`,
+          user
+        );
+        commit("updateUserInList", data);
+      } catch (err) {
+        console.error("Failed to update user:", err);
+      }
     },
+
     async addUser({ commit }, user) {
-      const response = await axios.post(
-        "https://jsonplaceholder.typicode.com/users",
-        user
-      );
-      commit("addUser", response.data);
+      try {
+        const { data } = await axios.post(
+          "https://jsonplaceholder.typicode.com/users",
+          user
+        );
+        commit("addUserToList", data);
+      } catch (err) {
+        console.error("Failed to add new user:", err);
+      }
     },
   },
+
   getters: {
-    getCount: (state) => state.count,
     getUsers: (state) => state.users,
     getUserById: (state) => (id) =>
-      state.users.find((user) => user.id === parseInt(id)) || state.currentUser,
+      state.users.find((u) => u.id === parseInt(id)) || state.currentUser,
   },
 });
